@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordena el Algoritmo en PSeInt</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:30px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+h1{
+    text-align:center;
+    color:#004a99;
+    margin-bottom:10px;
+}
+
+p{
+    text-align:center;
+    color:#555;
+    margin-bottom:25px;
+}
+
+.columns{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.box{
+    flex:1;
+    min-width:350px;
+    min-height:400px;
+    border:2px dashed #bfc7d1;
+    border-radius:10px;
+    padding:15px;
+    background:#fafafa;
+}
+
+.box h2{
+    text-align:center;
+    margin-bottom:15px;
+    color:#333;
+}
+
+.step{
+    background:#0d6efd;
+    color:white;
+    padding:12px;
+    margin:8px 0;
+    border-radius:8px;
+    cursor:move;
+    font-family:Consolas, monospace;
+    font-size:15px;
+}
+
+.drag-over{
+    background:#eef5ff;
+    border-color:#0d6efd;
+}
+
+.actions{
+    text-align:center;
+    margin-top:20px;
+}
+
+button{
+    padding:12px 24px;
+    border:none;
+    border-radius:8px;
+    background:#198754;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#157347;
+}
+
+#resultado{
+    margin-top:15px;
+    font-weight:bold;
+    font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>📝 Ordena el Algoritmo en PSeInt</h1>
+
+    <p>
+        Arrastra cada instrucción al área de respuesta y colócala en el orden correcto.
+    </p>
+
+    <div class="columns">
+
+        <div class="box" id="origen">
+            <h2>Instrucciones Desordenadas</h2>
+        </div>
+
+        <div class="box" id="destino">
+            <h2>Orden Correcto</h2>
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <button onclick="verificar()">Verificar Algoritmo</button>
+        <div id="resultado"></div>
+    </div>
+
+</div>
+
+<script>
+
+const algoritmoCorrecto = [
+    "Algoritmo Nombre",
+    "Definir num Como Real",
+    'Escribir "Ingrese un número"',
+    "Leer num",
+    "Escribir num",
+    "FinAlgoritmo"
+];
+
+// Mezclar elementos
+const elementos = [...algoritmoCorrecto]
+    .sort(() => Math.random() - 0.5);
+
+const origen = document.getElementById("origen");
+
+elementos.forEach(texto => {
+    const div = document.createElement("div");
+    div.className = "step";
+    div.draggable = true;
+    div.textContent = texto;
+    origen.appendChild(div);
+});
+
+let itemArrastrado = null;
+
+document.addEventListener("dragstart", e => {
+
+    if(e.target.classList.contains("step")){
+        itemArrastrado = e.target;
+    }
+
+});
+
+document.querySelectorAll(".box").forEach(box => {
+
+    box.addEventListener("dragover", e => {
+        e.preventDefault();
+        box.classList.add("drag-over");
+    });
+
+    box.addEventListener("dragleave", () => {
+        box.classList.remove("drag-over");
+    });
+
+    box.addEventListener("drop", e => {
+        e.preventDefault();
+        box.classList.remove("drag-over");
+
+        const afterElement = getDragAfterElement(box, e.clientY);
+
+        if(afterElement == null){
+            box.appendChild(itemArrastrado);
+        }else{
+            box.insertBefore(itemArrastrado, afterElement);
+        }
+    });
+
+});
+
+function getDragAfterElement(container, y){
+
+    const items = [
+        ...container.querySelectorAll(".step")
+    ];
+
+    return items.reduce((closest, child) => {
+
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if(offset < 0 && offset > closest.offset){
+            return {
+                offset: offset,
+                element: child
+            };
+        }
+
+        return closest;
+
+    }, {
+        offset: Number.NEGATIVE_INFINITY
+    }).element;
+}
+
+function verificar(){
+
+    const respuesta = [
+        ...document.querySelectorAll("#destino .step")
+    ].map(x => x.textContent);
+
+    const resultado = document.getElementById("resultado");
+
+    if(respuesta.length !== algoritmoCorrecto.length){
+
+        resultado.style.color = "red";
+        resultado.textContent =
+            "⚠️ Debes colocar todas las instrucciones.";
+
+        return;
+    }
+
+    if(JSON.stringify(respuesta) === JSON.stringify(algoritmoCorrecto)){
+
+        resultado.style.color = "green";
+        resultado.textContent =
+            "✅ ¡Correcto! El algoritmo está bien estructurado.";
+
+    }else{
+
+        resultado.style.color = "red";
+        resultado.textContent =
+            "❌ El orden del algoritmo no es correcto.";
+
+    }
+}
+
+</script>
+
+</body>
+</html>
