@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordena el Algoritmo - Preparar Café</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+    padding:30px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+h1{
+    text-align:center;
+    color:#6b4423;
+    margin-bottom:10px;
+}
+
+p{
+    text-align:center;
+    color:#555;
+    margin-bottom:20px;
+}
+
+.area{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.panel{
+    flex:1;
+    min-width:300px;
+    min-height:250px;
+    border:2px dashed #bbb;
+    border-radius:10px;
+    padding:15px;
+    background:#fafafa;
+}
+
+.panel h2{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.step{
+    background:#8b5a2b;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    margin:8px 0;
+    cursor:move;
+    text-align:center;
+    font-weight:bold;
+}
+
+.drag-over{
+    background:#fff6ea;
+    border-color:#d18b47;
+}
+
+button{
+    display:block;
+    margin:20px auto 10px;
+    padding:12px 24px;
+    border:none;
+    border-radius:8px;
+    background:#6b4423;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#87572e;
+}
+
+#resultado{
+    text-align:center;
+    font-weight:bold;
+    font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>☕ Preparar una Taza de Café</h1>
+    <p>Arrastra los pasos y colócalos en el orden correcto.</p>
+
+    <div class="area">
+        <div class="panel" id="origen">
+            <h2>Pasos Desordenados</h2>
+        </div>
+
+        <div class="panel" id="destino">
+            <h2>Orden Correcto</h2>
+        </div>
+    </div>
+
+    <button onclick="verificar()">Verificar</button>
+    <div id="resultado"></div>
+</div>
+
+<script>
+
+const pasosCorrectos = [
+    "Calentar agua",
+    "Agregar café a la taza",
+    "Verter el agua caliente",
+    "Mezclar y servir"
+];
+
+const pasosMezclados = [...pasosCorrectos]
+    .sort(() => Math.random() - 0.5);
+
+const origen = document.getElementById("origen");
+
+pasosMezclados.forEach(texto => {
+    const item = document.createElement("div");
+    item.className = "step";
+    item.textContent = texto;
+    item.draggable = true;
+    origen.appendChild(item);
+});
+
+let arrastrado = null;
+
+document.addEventListener("dragstart", e => {
+    if(e.target.classList.contains("step")){
+        arrastrado = e.target;
+    }
+});
+
+document.querySelectorAll(".panel").forEach(panel => {
+
+    panel.addEventListener("dragover", e => {
+        e.preventDefault();
+        panel.classList.add("drag-over");
+    });
+
+    panel.addEventListener("dragleave", () => {
+        panel.classList.remove("drag-over");
+    });
+
+    panel.addEventListener("drop", e => {
+        e.preventDefault();
+        panel.classList.remove("drag-over");
+        panel.appendChild(arrastrado);
+    });
+
+});
+
+function verificar(){
+
+    const respuesta = [...document.querySelectorAll("#destino .step")]
+        .map(x => x.textContent);
+
+    const resultado = document.getElementById("resultado");
+
+    if(respuesta.length !== pasosCorrectos.length){
+        resultado.style.color = "red";
+        resultado.textContent =
+            "Debes colocar los 4 pasos.";
+        return;
+    }
+
+    if(JSON.stringify(respuesta) === JSON.stringify(pasosCorrectos)){
+        resultado.style.color = "green";
+        resultado.textContent =
+            "✅ ¡Correcto! Has ordenado el algoritmo.";
+    }else{
+        resultado.style.color = "red";
+        resultado.textContent =
+            "❌ El orden no es correcto.";
+    }
+}
+</script>
+
+</body>
+</html>
